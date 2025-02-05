@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{\"pages/index.tsx -> ../components/BlocklyWorkspace\":{\"id\":\"pages/index.tsx -> ../components/BlocklyWorkspace\",\"files\":[\"static/chunks/components_BlocklyWorkspace_tsx.js\"]},\"pages/index.tsx -> ../components/LiveCursor\":{\"id\":\"pages/index.tsx -> ../components/LiveCursor\",\"files\":[\"static/chunks/components_LiveCursor_tsx.js\"]}}"
+self.__REACT_LOADABLE_MANIFEST="{}"
