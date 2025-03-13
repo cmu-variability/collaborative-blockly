@@ -59,7 +59,7 @@ export async function initCollaboration(roomId: string): Promise<CollabSetup> {
     // In production (Vercel), use the deployed WebSocket server
     // In development, use the local server
     let serverUrl = typeof window !== 'undefined' ? 
-      process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://your-deployed-ws-server.onrender.com' :
+      process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://blockly-websocket-server.onrender.com' :
       'ws://localhost:1234';
       
     // For local development, fallback to localhost
