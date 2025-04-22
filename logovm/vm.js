@@ -3,7 +3,6 @@
 // stack
 
 
-const { createLessThan } = require("typescript");
 
 // thread
 // ip - instruction pointer
@@ -22,8 +21,12 @@ const OpCodes =  Object.freeze({
     EOLR: 4, 
     LGET: 5,
     LSET: 6,
-    UFUN: 7
+    UFUN: 7,
+    FOREVER: 8
 });
+
+// look back in original VM code for lget and lset
+// write stack-printing function
 
 // ILIST = 1
 // EOL = 2 
@@ -38,50 +41,130 @@ const OpCodes =  Object.freeze({
 
 const TurtleOpCodes =  Object.freeze({ 
     FD: 10,
-    BK: 11
+    BK: 11,
+    RT: 12,
+    PEN_UP: 13,
+    PEN_DOWN: 14,
+    START_WAIT: 15,
+    CHECK_WAIT: 16
 });
 
-const turtle = require('turtle-logo');
 
+let ip = 0;
+let sp = 0;
+let stack = [];
+let instruction_memory = [];
+let turtle = null;
 
-var dispatch() {
-  while(true) {
-    var here = instruction_memory[ip++];    
-    switch(here) {
-            case OpCodes.DONE: 
-                return;
-            case OpCodes.DATA: 
-                stack[sp++] = instruction_memory[ip++];
-                break;
-            case TurtleOpCodes.FD: 
-                var steps = stack[--sp];
-                turtle.forward(steps);
-                break;
-        }
+function dispatch() {
+    var wait_time = 0.0;
+    var list_len = 0;
+    
+    let execute_next = ()  => 
+    {
+        var here = instruction_memory[ip++];   
+        switch(here) {
+                case OpCodes.DONE: 
+                    return;
+                case OpCodes.DATA: 
+                    stack[sp++] = instruction_memory[ip++];
+                    break;
+                case TurtleOpCodes.FD: 
+                    var steps = stack[--sp];
+                    turtle.forward(steps);
+                    t.draw_turtle();
+                    break;
+
+                case TurtleOpCodes.BK: 
+                    var steps = stack[--sp];
+                    turtle.backward(steps);
+                    break;
+
+                case TurtleOpCodes.RT: 
+                    var degrees = stack[--sp];
+                    turtle.rotate(degrees);
+                    break;
+
+                case TurtleOpCodes.PEN_UP: 
+                    turtle.pen_down = false;
+                    break;
+                
+                case TurtleOpCodes.START_WAIT:
+                    wait_time = stack[--sp] + performance.now();
+                    break;
+
+                case TurtleOpCodes.CHECK_WAIT:
+                    if (wait_time < performance.now())
+                    {
+                        ip++;
+                        // wait_time = 0;
+                    }
+                    break;
+                
+                case OpCodes.ILIST:
+                    list_len = stack[--sp];
+                    break;
+                
+                case OpCodes.EOL:
+                    ip -= list_len;
+                    break;
+            }
+
+            draw();
+
+            // 1/60th of a second
+
+            window.requestAnimationFrame(execute_next);
+        };
+
+        window.requestAnimationFrame(execute_next);
+
+        
+        
+        
+
     }
+
+function run_instruction(instruction, sprite)
+{
+    ip = 0;
+    sp = 0;
+    stack = [];
+    instruction_memory = instruction;
+    turtle = sprite;
+
+    dispatch();
+    
 }
 
+document.getElementById("run_button").onclick = () => {
+    run_instruction([ OpCodes.DATA, 100, TurtleOpCodes.FD, 
+        OpCodes.DATA, 1000, 
+        TurtleOpCodes.START_WAIT, 
+        OpCodes.DATA, 8, OpCodes.ILIST, OpCodes.DATA, 30, TurtleOpCodes.RT, OpCodes.DATA, 10, TurtleOpCodes.FD, TurtleOpCodes.CHECK_WAIT, OpCodes.EOL, OpCodes.DONE], t);
+};
+
+// setup game - put hat for setup game and a hat for run (think start and update)
+// pause - start at the beginning of instruction
 
 
-instruction_memory [ DATA 10 FD DONE ]
-stack []
-ip = 0
-sp = 0
+// instruction_memory [ DATA 10 FD DONE ]
+// stack []
+// ip = 0
+// sp = 0
 
-dispatch()
+// instruction_memory[0] 
+// ip = 1
 
-instruction_memory[0] 
-ip = 1
+// instruction_memory[1]
+// ip = 2
+// stack[0] = 10
+// sp = 1
 
-instruction_memory[1]
-ip = 2
-stack[0] = 10
-sp = 1
+// instruction_memory[2]
+// ip = 3
+// stack[0] 
+// sp = 0
+// turtle.forward(popped value from stack)
 
-instruction_memory[2]
-ip = 3
-stack[0] 
-sp = 0
-turtle.forward(popped value from stack)
-
----------------
+// ---------------
