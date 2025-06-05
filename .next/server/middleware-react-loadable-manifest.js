@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"lib/projects.ts -> ./collab\":{\"id\":\"lib/projects.ts -> ./collab\",\"files\":[]}}"

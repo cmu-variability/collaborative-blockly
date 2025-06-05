@@ -13,7 +13,7 @@
     "@types/lodash": "^4.17.16",
     "@types/uuid": "^10.0.0",
     "blockly": "^10.4.3",
-    "firebase": "^11.4.0",
+    "firebase": "^11.8.1",
     "lodash": "^4.17.21",
     "next": "^14.0.0",
     "react": "^18.2.0",
