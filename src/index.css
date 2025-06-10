@@ -3,17 +3,9 @@ body {
   max-width: 100vw;
 }
 
-pre,
-code {
-  overflow: auto;
-}
 
-#pageContainer {
-  display: flex;
-  width: 100%;
-  max-width: 100vw;
-  height: 100vh;
-}
+
+
 
 #blocklyDiv {
   flex-basis: 100%;
@@ -21,22 +13,10 @@ code {
   min-width: 600px;
 }
 
-#outputPane {
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  flex: 0 0 400px;
-  overflow: auto;
-  margin: 1rem;
-}
+#canvases {
+  min-width: 200px;
+  width: 20%;
 
-#generatedCode {
-  height: 50%;
-  background-color: rgb(247, 240, 228);
-}
-
-#output {
-  height: 50%;
 }
 
 

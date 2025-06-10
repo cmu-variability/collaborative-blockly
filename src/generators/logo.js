@@ -72,16 +72,33 @@ logoGenerator.forBlock['Rotate'] = function (block, generator) {
 
 
 logoGenerator.forBlock['start'] = function (block, generator) {
-  const commands = generator.statementToCode(block, 'commands');  
+  let commands = generator.statementToCode(block, 'commands'); 
+
+  // for some reason, statementToCode from Blockly inserts an indent automatically
+  commands = commands.substring(1,commands.length);
+
   const code = `${commands},${OpCodes.DONE}`;
   return code;
 };
+
+logoGenerator.forBlock['for_miliseconds'] = function(block, generator) {
+  const duration = block.getFieldValue('NAME');
+
+  let commands = generator.statementToCode(block, 'commands');
+  // for some reason, statementToCode from Blockly inserts an indent automatically
+  commands = commands.substring(1,commands.length);
+
+  // length + 2 because we add a CHECK_WAIT and EOL opcode into the end of the ILIST
+  const num_commands = commands.split(",").length + 2;
+  
+  const code = `${OpCodes.DATA},${duration},${TurtleOpCodes.START_WAIT},${OpCodes.DATA},${num_commands},${OpCodes.ILIST},${commands},${TurtleOpCodes.CHECK_WAIT},${OpCodes.EOL}`;
+  return code;
+}
 
 
 logoGenerator.scrub_ = function (block, code, thisOnly) {
   const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
   if (nextBlock && !thisOnly) {
-    console.log(logoGenerator.blockToCode(nextBlock));
     return code + "," + logoGenerator.blockToCode(nextBlock);
 
   }

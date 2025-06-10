@@ -22,7 +22,11 @@ export const toolbox = {
     {
       kind: 'block',
       type: 'start',
-    }
+    }, 
+    {
+      kind: 'block',
+      type:'for_miliseconds',
+    },
 
   ],
 };

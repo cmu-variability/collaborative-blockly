@@ -63,7 +63,35 @@ export const blocks = Blockly.common.createBlockDefinitionsFromJsonArray([
       }
     ],
     "colour": 285
+  }, 
+  {
+    "type": "for_miliseconds",
+    "tooltip": "",
+    "helpUrl": "",
+    "message0": "%1 %2 %3",
+    "args0": [
+      {
+        "type": "field_label_serializable",
+        "text": "For miliseconds",
+        "name": "For miliseconds"
+      },
+      {
+        "type": "field_number",
+        "name": "NAME",
+        "value": 0
+      },
+      {
+        "type": "input_statement",
+        "name": "commands"
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 180
   }
+                      
+                      
+
                       
                       
                       

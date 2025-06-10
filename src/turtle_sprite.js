@@ -1,103 +1,120 @@
-function TurtleSprite(app, spriteRef, lineGraphics){
+import { Graphics, Ticker } from 'pixi.js';
+
+function TurtleSprite(app, spriteRef){
 
     // PixiJS object references
     this.app = app;
-    this.spriteRef = spriteRef;
-    this.lineGraphics = lineGraphics;
 
+    this.spriteRef = spriteRef;
+
+    // the lines that the turtle draws
+    this.lineGraphics = new Graphics();
+
+
+    // lines are only drawn when the pen is down
+    this.pen_down = true;
+    // TODO: add block to change pen color
+    this.pen_color = 0xffffff;
 
 
     // turtle movement
     this.x = this.spriteRef.x;
     this.y = this.spriteRef.y;
     this.speed = 1.0;
-    
-      
-
-    this.pen_down = true;
-    this.pen_color = 0xffffff;
-    this.isMoving = true;
-    
-
-
-    // translate logo coords to p5 coords
     this.heading = 0;
+    
+    // save the original position and heading to reset later
+    this.originalX = this.spriteRef.x;
+    this.originalY = this.spriteRef.y;
+    this.originalHeading = this.heading;
 
-    this.app.ticker.add((_) => {
+
+    // update the actual sprite: called at every frame update during execution
+    this.callback = (_) => {
+        this.startX = this.spriteRef.x;
+        this.startY = this.spriteRef.y;
         if (this.spriteRef.x != this.x ||
-            this.spriteRef.y != this.y
-        )
+            this.spriteRef.y != this.y ||
+            this.spriteRef.direction != this.heading)
         {
-            this.lineGraphics.moveTo(this.spriteRef.x, this.spriteRef.y);
             this.spriteRef.x = this.x;
             this.spriteRef.y = this.y;
+
             this.spriteRef.direction = this.heading;
-            
-           
-            // Draw down to bottom (x = i*10, y = 100)
-            this.lineGraphics.lineTo(this.spriteRef.x, this.spriteRef.y);
+            this.spriteRef.rotation = this.heading;
 
-            // Stroke all lines in white with pixel-perfect width
-            this.lineGraphics.stroke({ color: this.pen_color, pixelLine: true });
+            this.lineGraphics.moveTo(this.startX, this.startY)
+                .lineTo(this.x, this.y)
+                .stroke({ color: this.pen_color, pixelLine: true });
         }
-        
-    });
-    
+ 
+    };
 
-    // this.update_turtle = () =>
-    // {
-
-    //     if (this.img_loaded)
-    //     {
-    //         this.draw_turtle();
-    //         this.draw_pen();
-
-    //     }
-
-    //     this.draw_pen();
-
-
-        
-    // }
-
-    this.draw_pen = () =>
+    // reset the sprite to original position and heading
+    this.reset_redraw = (_) => 
     {
+        console.log("STOPPING");
+        this.spriteRef.x = this.originalX;
+        this.spriteRef.y = this.originalY;
+        this.x = this.originalX;
+        this.y = this.originalY;
 
-        // calculate fraction of canvas is filled with pixels
-        // treat as bitmap
+        this.spriteRef.direction = this.originalHeading;
+        this.spriteRef.rotation = this.originalHeading;
+        this.heading = this.originalHeading;
 
-        // 14 primary colors
-        // rainbow + brown/grey
-        // hsb color wheel (0, 360), brown and for grey
-        // 10 shades of those primary colors
-        // primary color to white, 5 shades from each through linear interpolation
-
-        // 0-70 color (word is center shade, words from primary colors)
-        
-        this.lineCtx.putImageData(this.lineBitmap, 0, 0);
-
+        this.app.stage.removeChildren();
+        this.app.stage.addChild(this.spriteRef);
+        this.app.ticker.stop();
 
     }
+
+
+
+    
+
+   
+    
+
+    this.reset_turtle = (_) =>
+    {
+        // stop the animation
+        this.app.ticker.addOnce(this.reset_redraw);
+        
+        // no longer redraw the sprite after the final redraw
+        this.app.ticker.remove(this.callback);
+
+
+    
+    }
+
+    this.start_turtle = () =>
+    {
+        this.app.ticker.remove()
+
+        // create new graphics object, add it to the stage
+        this.lineGraphics = new Graphics();
+        this.app.stage.addChild(this.lineGraphics);
+
+        this.app.ticker.add(this.callback);
+
+        // start "ticking" (i.e. animating at each frame)
+        this.app.ticker.start();
+
+    }
+
+   
 
 
    
 
     this.forward = (steps) =>
     {
-
         // Note: since heading is oriented with 0 upward, x is the sin component
         // and y is the cos component
-        // let prevX = this.x;
-        // let prevY = this.y;
+
         this.x += this.speed*steps*Math.sin(this.heading);
         this.y += this.speed*-steps*Math.cos(this.heading);
-
-        // if (this.pen_down)
-        // {
-        //    this.bresenhamLine(prevX, prevY, this.x, this.y, [255,0,0]);
-        // }
-
-        console.log(`${this.x}, ${this.y}`)
 
     }
 

@@ -13,7 +13,7 @@ import './index.css';
 import { run } from './vm';
 
 // Pixi.js code
-import { Application, Assets, Sprite, Graphics } from 'pixi.js';
+import { Application, Assets, Sprite } from 'pixi.js';
 import TurtleSprite from './turtle_sprite';
 
 
@@ -45,18 +45,22 @@ import TurtleSprite from './turtle_sprite';
     bunny.x = app.screen.width / 2;
     bunny.y = app.screen.height / 2;
 
-    const lineGraphics = new Graphics();
-
-    app.stage.addChild(lineGraphics);
-
-
-    const turtle = new TurtleSprite(app, bunny, lineGraphics);
+    const turtle = new TurtleSprite(app, bunny);
+    let vm_callback;
 
     document.getElementById("run_button").onclick = () => {
-  
-      run(codeDiv.innerText, turtle);
+      turtle.start_turtle();
+      vm_callback = run(code, turtle);
+      
     
     };
+
+    document.getElementById("reset_button").onclick = () => {
+      turtle.reset_turtle();
+      app.ticker.remove(vm_callback); 
+    };
+
+  
     
 })();
 //
@@ -65,20 +69,19 @@ import TurtleSprite from './turtle_sprite';
 Blockly.common.defineBlocks(blocks);
 
 // Set up UI elements and inject Blockly
-const codeDiv = document.getElementById('generatedCode').firstChild;
 const blocklyDiv = document.getElementById('blocklyDiv');
 const ws = Blockly.inject(blocklyDiv, {toolbox});
+let code = "";
 
 // This function resets the code div and shows the
 // generated code from the workspace.
-const displayCode = () => {
-  const code = logoGenerator.workspaceToCode(ws);
-  codeDiv.innerText = code;
+const getCode = () => {
+  code = logoGenerator.workspaceToCode(ws);
 };
 
 // Load the initial state from storage and run the code.
 load(ws);
-displayCode();
+getCode();
 
 // Every time the workspace changes state, save the changes to storage.
 ws.addChangeListener((e) => {
@@ -100,7 +103,7 @@ ws.addChangeListener((e) => {
   ) {
     return;
   }
-  displayCode();
+  getCode();
 });
 
 

@@ -58,12 +58,18 @@ let instruction_memory = [];
 function dispatch(sprite) {
     var wait_time = 0.0;
     var list_len = 0;
-
-    while (true)
+    
+        
+    console.log("IP: " + ip);
+    let execute_instruction = () =>
     { 
+        console.log(ip);
         var here = instruction_memory[ip++];  
+
+
         switch(here) {
                 case OpCodes.DONE: 
+                    sprite.app.ticker.remove(execute_instruction);
                     return;
                 case OpCodes.DATA: 
                     stack[sp++] = instruction_memory[ip++];
@@ -72,7 +78,6 @@ function dispatch(sprite) {
                     var steps = stack[--sp];
                     sprite.forward(steps);
                     break;
-
                 case TurtleOpCodes.BK: 
                     var steps = stack[--sp];
                     sprite.backward(steps);
@@ -95,7 +100,7 @@ function dispatch(sprite) {
                     if (wait_time < performance.now())
                     {
                         ip++;
-                        // wait_time = 0;
+                        wait_time = 0;
                     }
                     break;
                 
@@ -108,6 +113,10 @@ function dispatch(sprite) {
                     break;
             }
     }
+    
+    sprite.app.ticker.add(execute_instruction);
+    
+    
 
 
 }
@@ -126,41 +135,21 @@ function run_instruction(instruction, sprite)
 
 
 export const run = (instruction_string, sprite) => {
-   const instruction = instruction_string.substring(1,instruction_string.length).split(",");
-   let new_instruction = []
-   instruction.forEach(code => {
+ 
+    const instruction = instruction_string.split(",");
+    let new_instruction = []
+    instruction.forEach(code => {
     new_instruction.push(parseInt(code));
-    
-   });
-   console.log(new_instruction);
-   run_instruction(new_instruction, sprite);
-   console.log("exited loop");
+
+    });
+
+
+   
+    run_instruction(new_instruction, sprite);
 
 };
 
 
 
-// setup game - put hat for setup game and a hat for run (think start and update)
-// pause - start at the beginning of instruction
 
 
-// instruction_memory [ DATA 10 FD DONE ]
-// stack []
-// ip = 0
-// sp = 0
-
-// instruction_memory[0] 
-// ip = 1
-
-// instruction_memory[1]
-// ip = 2
-// stack[0] = 10
-// sp = 1
-
-// instruction_memory[2]
-// ip = 3
-// stack[0] 
-// sp = 0
-// turtle.forward(popped value from stack)
-
-// ---------------
