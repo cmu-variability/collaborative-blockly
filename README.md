@@ -4,6 +4,11 @@
 
 This app shows an example of how Blockly blocks can be compiled into logo instructions, which are then run on a virtual machine. In this case, the blocks control an example sprite that has the same capabilities as the logo turtle (moving forward, backwards, rotating, and drawing with the pen), which is rendered using PixiJS. 
 
+![the collaborative blockly example interface with the block-based programming environment on the left and the rendering canvas on the right.](./images/example.png)
+
+
+In its current iteration, it includes blocks to control a sprite to move forward, rotate, and repeat a list of instructions for a specified number of miliseconds.
+
 ## Quick Start
 
 1. [Install](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) npm if you haven't before.
