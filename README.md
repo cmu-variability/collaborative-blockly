@@ -1,8 +1,8 @@
-# Blockly Sample App
+# Collaborative Blockly VM Example
 
 ## Purpose
 
-This app illustrates how to use Blockly together with common programming tools like node/npm, webpack, typescript, eslint, and others. You can use it as the starting point for your own application and modify it as much as you'd like. It contains basic infrastructure for running, building, testing, etc. that you can use even if you don't understand how to configure the related tool yet. When your needs outgrow the functionality provided here, you can replace the provided configuration or tool with your own.
+This app shows an example of how Blockly blocks can be compiled into logo instructions, which are then run on a virtual machine. In this case, the blocks control an example sprite that has the same capabilities as the logo turtle (moving forward, backwards, rotating, and drawing with the pen), which is rendered using PixiJS. 
 
 ## Quick Start
 
@@ -12,39 +12,63 @@ This app illustrates how to use Blockly together with common programming tools l
 4. Run `npm run start` to run the development server and see the app in action.
 5. If you make any changes to the source code, just refresh the browser while the server is running to see them.
 
-## Tooling
+## Key Files and Structure
 
-The application uses many of the same tools that the Blockly team uses to develop Blockly itself. Following is a brief overview, and you can read more about them on our [developer site](https://developers.google.com/blockly/guides/contribute/get-started/development_tools).
+All paths in this documentation are local to the `src` directory.
 
-- Structure: The application is built as an npm package. You can use npm to manage the dependencies of the application.
-- Modules: ES6 modules to handle imports to/exports from other files.
-- Building/bundling: Webpack to build the source code and bundle it into one file for serving.
-- Development server: webpack-dev-server to run locally while in development.
-- Testing: Mocha to run unit tests.
-- Linting: Eslint to lint the code and ensure it conforms with a standard style.
-- UI Framework: Does not use a framework. For more complex applications, you may wish to integrate a UI framework like React or Angular.
+`index.js` is the main file that handles the creation of the interface, including the Blockly workspace/toolbar and the PixiJS app for rendering sprites.
 
-You can disable, reconfigure, or replace any of these tools at any time, but they are preconfigured to get you started developing your Blockly application quickly.
+### Block Interface
 
-## Structure
+All custom (i.e. not included with Blockly) blocks are described in `blocks/json.js`. JSON for new blocks can be created using the [Blockly Block Factory](https://google.github.io/blockly-samples/examples/developer-tools/index.html). To add these blocks to the toolbar in the app, add the `toolbox` object in `toolbox.js`. `index.js` uses the `toolbox.js` object to initialize the Blockly workspace. 
 
-- `package.json` contains basic information about the app. This is where the scripts to run, build, etc. are listed.
-- `package-lock.json` is used by npm to manage dependencies
-- `webpack.config.js` is the configuration for webpack. This handles bundling the application and running our development server.
-- `src/` contains the rest of the source code.
-- `dist/` contains the packaged output (that you could host on a server, for example). This is ignored by git and will only appear after you run `npm run build` or `npm run start`.
+Please note that adding blocks to `blocks/json.js` and to `toolbox.js` only adds new blocks to the interface. For these blocks to be compiled correctly, they must be added to the generator (described below).
 
-### Source Code
+### Generator and Virtual Machine
 
-- `index.html` contains the skeleton HTML for the page. This file is modified during the build to import the bundled source code output by webpack.
-- `index.js` is the entry point of the app. It configures Blockly and sets up the page to show the blocks, the generated code, and the output of running the code in JavaScript.
-- `serialization.js` has code to save and load the workspace using the browser's local storage. This is how your workspace is saved even after refreshing or leaving the page. You could replace this with code that saves the user's data to a cloud database instead.
-- `toolbox.js` contains the toolbox definition for the app. The current toolbox contains nearly every block that Blockly provides out of the box. You probably want to replace this definition with your own toolbox that uses your custom blocks and only includes the default blocks that are relevant to your application.
-- `blocks/text.js` has code for a custom text block, just as an example of creating your own blocks. You probably want to delete this block, and add your own blocks in this directory.
-- `generators/javascript.js` contains the JavaScript generator for the custom text block. You'll need to include block generators for any custom blocks you create, in whatever programming language(s) your application will use.
+Blocks are compiled into Logo opcodes using a custom logo generator in `generators/logo.js`. This generator works by mapping the name of a block to functions to turn block objects into a comma-separated string of Logo opcodes in the generator's forBlock attribute, e.g.:
+
+```
+logoGenerator.forBlock['<name of block>'] = function (block, generator) {
+  ... convert block into code string ....
+  return code;
+};
+```
+
+Further details about implementing custom generators in Blockly can be found in [this tutorial](https://blocklycodelabs.dev/codelabs/custom-generator/index.html?index=..%2F..index#0). 
+
+One improvement that could be made to the generator is generating an array of opcodes instead of a string. Unfortunately, from a readthrough of the [generator class](https://github.com/google/blockly/blob/develop/core/generator.ts), it seems that it only supports generators that produce strings.
+
+For this reason, the `run` function in `vm.js` first parses the string into an array of integer op codes, then calls `run_instruction` on that array of opcodes.
+
+The `run` function returns a callback function which executes a single instruction. Currently, in `index.js` this callback function is passed into the sprite to be called each time the sprite is redrawn. This is a temporary fix to allow the sprite to be drawn as execution of commands occurs, as just executing the code separately from the PixiJS app causes rendering to only occur after all the code is run. For this reason, it is necessary for timed blocks like the `for_miliseconds` block to work. However, this means execution is *much slower* than it should be, as it only executes one instruction each frame. Further investigation of the [PixiJS documentation](https://pixijs.download/release/docs/index.html) (and most likely the source code as well) is needed to fix this code.
+
+
+
+### Sprite Rendering
+
+Rendering is done via PixiJS. The current sprite is called `TurtleSprite` (although it is currently rendered as the default PixiJS rabbit) because it has the same capabilities as the Logo turtle. The class can be found in `turtle_sprite.js`. It currently has functions to move forward, backward, and rotate implemented. The "Reset" button calls `reset_turtle` (which stops all execution and rendering and returns the sprite to its default position/orientation). The "Run" button takes the function created from the `run` function in `vm.js` (see above) and passes it in to `start_turtle`, which adds a callback to both execute an instruction and render the sprite at each frame.
 
 ## Serving
 
 To run your app locally, run `npm run start` to run the development server. This mode generates source maps and ingests the source maps created by Blockly, so that you can debug using unminified code.
 
 To deploy your app so that others can use it, run `npm run build` to run a production build. This will bundle your code and minify it to reduce its size. You can then host the contents of the `dist` directory on a web server of your choosing. If you're just getting started, try using [GitHub Pages](https://pages.github.com/).
+
+
+## Current Areas for Improvement
+Before further developing this into a collaborative application, there are some changes that should be made.
+
+Higher Effort:
+
+- [ ] Separating VM execution and rendering while having execution and rendering still happen simultaenously
+- [ ] Adding key primitive VM instructions (LGET, LSET, UFUN) and corresponding blocks
+- [ ] Maybe not immediately necessary: directly generating an integer array of opcodes instead of string (may need to modify Blockly's [generator.ts](https://github.com/google/blockly/blob/develop/core/generator.ts)).
+
+Lower Effort:
+- [ ] Adding blocks for simpler commands: 
+  - [ ] Backward
+  - [ ] Pen up/down
+
+
+

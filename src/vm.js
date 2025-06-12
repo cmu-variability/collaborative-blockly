@@ -60,10 +60,8 @@ function dispatch(sprite) {
     var list_len = 0;
     
         
-    console.log("IP: " + ip);
     let execute_instruction = () =>
     { 
-        console.log(ip);
         var here = instruction_memory[ip++];  
 
 
@@ -113,12 +111,8 @@ function dispatch(sprite) {
                     break;
             }
     }
-    
-    sprite.app.ticker.add(execute_instruction);
-    
-    
 
-
+    return execute_instruction;
 }
 
 function run_instruction(instruction, sprite)
@@ -128,7 +122,7 @@ function run_instruction(instruction, sprite)
     stack = [];
     instruction_memory = instruction;
 
-    dispatch(sprite);
+   return dispatch(sprite);
     
 }
 
@@ -143,9 +137,7 @@ export const run = (instruction_string, sprite) => {
 
     });
 
-
-   
-    run_instruction(new_instruction, sprite);
+    return run_instruction(new_instruction, sprite);
 
 };
 

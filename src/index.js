@@ -22,12 +22,14 @@ import TurtleSprite from './turtle_sprite';
 {
     // Create a PixiJS application.
     const app = new Application();
+    
 
     // Intialize the application.
-    await app.init({ background: '#1099bb', resizeTo: window });
+    await app.init({ background: '#1099bb', width: 600,
+                  height: 600});
 
     // Then adding the application's canvas to the DOM body.
-    document.getElementById("wrapper").appendChild(app.canvas);
+    document.getElementById("canvases").appendChild(app.canvas);
 
     // Load the bunny texture.
     const texture = await Assets.load('https://pixijs.com/assets/bunny.png');
@@ -46,22 +48,31 @@ import TurtleSprite from './turtle_sprite';
     bunny.y = app.screen.height / 2;
 
     const turtle = new TurtleSprite(app, bunny);
-    let vm_callback;
 
     document.getElementById("run_button").onclick = () => {
-      turtle.start_turtle();
-      vm_callback = run(code, turtle);
+      // create a function to execute a single instruction in the vm
+      let vm_callback = run(code, turtle);
+
+      // start the turtle
+      turtle.start_turtle(vm_callback);
+
+
+      document.getElementById("run_button").style.display = "none";
+      document.getElementById("reset_button").style.display = "block";
+
       
-    
     };
 
-    document.getElementById("reset_button").onclick = () => {
+    document.getElementById("reset_button").onclick = async () => {
+      // stop the turtle (and the execution of code by extension)
       turtle.reset_turtle();
-      app.ticker.remove(vm_callback); 
+       
+      document.getElementById("reset_button").style.display = "none";
+      document.getElementById("run_button").style.display = "block";
+
     };
 
-  
-    
+   
 })();
 //
 

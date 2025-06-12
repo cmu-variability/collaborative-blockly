@@ -1,4 +1,4 @@
-import { Graphics, Ticker } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 
 function TurtleSprite(app, spriteRef){
 
@@ -28,9 +28,14 @@ function TurtleSprite(app, spriteRef){
     this.originalY = this.spriteRef.y;
     this.originalHeading = this.heading;
 
+    
+    // higher order function that takes in a function to execute a vm instruction
+    this.callback = (vm_callback) => (_) => {
 
-    // update the actual sprite: called at every frame update during execution
-    this.callback = (_) => {
+        // TODO: find a better way to execute vm instructions simultaenously to 
+        // drawing
+        vm_callback();
+
         this.startX = this.spriteRef.x;
         this.startY = this.spriteRef.y;
         if (this.spriteRef.x != this.x ||
@@ -50,53 +55,48 @@ function TurtleSprite(app, spriteRef){
  
     };
 
+    // keeps track of the current update function
+    this.current_callback = null;
+
     // reset the sprite to original position and heading
     this.reset_redraw = (_) => 
     {
-        console.log("STOPPING");
+        // reset position
         this.spriteRef.x = this.originalX;
         this.spriteRef.y = this.originalY;
         this.x = this.originalX;
         this.y = this.originalY;
 
+        // reset rotation
         this.spriteRef.direction = this.originalHeading;
         this.spriteRef.rotation = this.originalHeading;
         this.heading = this.originalHeading;
 
+
+        // reset 
         this.app.stage.removeChildren();
         this.app.stage.addChild(this.spriteRef);
-        this.app.ticker.stop();
-
+        this.app.ticker.remove(this.current_callback);
     }
 
 
 
-    
 
-   
-    
-
-    this.reset_turtle = (_) =>
+    this.reset_turtle =  (_) =>
     {
-        // stop the animation
+        // stop the animation on the next tick
         this.app.ticker.addOnce(this.reset_redraw);
-        
-        // no longer redraw the sprite after the final redraw
-        this.app.ticker.remove(this.callback);
-
-
-    
     }
 
-    this.start_turtle = () =>
+    this.start_turtle = (vm_callback) =>
     {
-        this.app.ticker.remove()
-
         // create new graphics object, add it to the stage
         this.lineGraphics = new Graphics();
         this.app.stage.addChild(this.lineGraphics);
 
-        this.app.ticker.add(this.callback);
+        this.current_callback = this.callback(vm_callback);
+
+        this.app.ticker.add(this.current_callback);
 
         // start "ticking" (i.e. animating at each frame)
         this.app.ticker.start();
