@@ -12,10 +12,9 @@ In its current iteration, it includes blocks to control a sprite to move forward
 ## Quick Start
 
 1. [Install](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) npm if you haven't before.
-2. Run [`npx @blockly/create-package app <application-name>`](https://www.npmjs.com/package/@blockly/create-package) to clone this application to your own machine.
-3. Run `npm install` to install the required dependencies.
-4. Run `npm run start` to run the development server and see the app in action.
-5. If you make any changes to the source code, just refresh the browser while the server is running to see them.
+2. Run `npm install` to install the required dependencies.
+3. Run `npm run start` to run the development server and see the app in action.
+4. If you make any changes to the source code, just refresh the browser while the server is running to see them.
 
 ## Key Files and Structure
 
